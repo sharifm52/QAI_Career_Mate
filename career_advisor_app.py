@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 import os
 
-# Set OpenAI client using environment variable
+# Set OpenAI client using your environment variable
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(page_title="CareerMate AI", page_icon="🧠")
@@ -26,5 +26,15 @@ if prompt := st.chat_input("What would you like help with?"):
     st.chat_message("user").write(prompt)
 
     try:
-        # OpenAI response
-        response = c
+        # Call OpenAI API
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=st.session_state.messages
+        )
+        reply = response.choices[0].message.content
+        st.chat_message("assistant").write(reply)
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+
+    except Exception as e:
+        st.error("Something went wrong. Please try again later.")
+        st.exception(e)
