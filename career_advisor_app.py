@@ -1,44 +1,30 @@
 import streamlit as st
 import openai
+import os
 
-# Enter your OpenAI API key here or set as environment variable
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
-system_prompt = """
-You are a friendly and practical career advisor AI called CareerMate. 
-You ask users about their interests, job background, and goals, then suggest career paths, 
-learning resources, or next steps. Be non-judgmental and supportive.
-"""
+# Set OpenAI client using environment variable
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(page_title="CareerMate AI", page_icon="🧠")
-st.title("🧠 CareerMate AI – Your Personal Career Advisor")
 
+st.title("🧠 CareerMate AI – Your Personal Career Advisor")
+st.write("Hi there! 👋 I'm CareerMate. Tell me a bit about yourself — what’s your current job or experience, and what are you interested in?")
+
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "assistant", "content": "Hi there! 👋 I'm CareerMate. Tell me a bit about yourself — what’s your current job or experience, and what are you interested in?"}
+        {"role": "system", "content": "You are CareerMate, an expert career advisor that provides helpful, clear, and practical advice based on the user's background and goals."}
     ]
 
-for msg in st.session_state.messages:
-    if msg["role"] != "system":
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+# Display chat messages
+for msg in st.session_state.messages[1:]:
+    st.chat_message(msg["role"]).write(msg["content"])
 
-user_input = st.chat_input("Type your message here...")
+# User input
+if prompt := st.chat_input("What would you like help with?"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
 
-if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
-
-    with st.chat_message("user"):
-        st.markdown(user_input)
-
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=st.session_state.messages
-    )
-    reply = response.choices[0].message.content
-
-    with st.chat_message("assistant"):
-        st.markdown(reply)
-
-    st.session_state.messages.append({"role": "assistant", "content": reply})
+    try:
+        # OpenAI response
+        response = c
